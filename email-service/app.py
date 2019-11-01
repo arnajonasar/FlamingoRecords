@@ -4,9 +4,11 @@ import json
 from time import sleep
 from os import environ
 
+
 def get_connection_string():
     with open('./config/mb.%s.json' % environ.get('PYTHON_ENV'), 'r') as f:
         return json.load(f)
+
 
 def connect_to_mb():
     error = False
@@ -32,6 +34,7 @@ customer_email_queue_name = 'customer_email_queue'
 customer_template = '<h2>Your customer was created successfully!</h2><p>We are glad to see you join our platform and hope you will like it! Now you can go into our system and log in using the credentials used to create the user.</p>'
 order_template = '<h2>Thank you for ordering @ Flamingo records!</h2><p>We hope you will enjoy our lovely product and don\'t hesitate to contact us if there are any questions.</p><table><thead><tr style="background-color: rgba(155, 155, 155, .2)"><th>Description</th><th>Unit price</th><th>Quantity</th><th>Row price</th></tr></thead><tbody>%s</tbody></table>'
 
+
 def setup_queue(exchange_name, queue_name, routing_key):
     # Declare the queue, if it doesn't exist
     channel.queue_declare(queue=queue_name, durable=True)
@@ -44,18 +47,21 @@ channel.exchange_declare(exchange=exchange_name, exchange_type='direct', durable
 setup_queue(exchange_name, order_email_queue_name, create_order_routing_key)
 setup_queue(exchange_name, customer_email_queue_name, create_customer_routing_key)
 
+
 def send_simple_message(to, subject, body):
     return requests.post(
-        "<insert-your-mailgun-settings>",
+        "https://api.mailgun.net/v3/sandbox03b56844f2ce484eb38fbaa721ce6127.mailgun.org/messages",
         auth=("api", "<insert-your-mailgun-api-key>"),
         data={"from": "Mailgun Sandbox <mailgun@<insert-your-mailgun-sandbox>>",
               "to": to,
               "subject": subject,
               "html": body})
 
+
 def send_ack(ch, delivery_tag, success):
     if success:
         ch.basic_ack(delivery_tag)
+
 
 def send_order_email(ch, method, properties, data):
     parsed_msg = json.loads(data)
@@ -67,6 +73,7 @@ def send_order_email(ch, method, properties, data):
     representation = order_template % items_html
     response = send_simple_message(email, 'Successful order!', representation)
     send_ack(ch, method.delivery_tag, response.ok)
+
 
 def send_customer_email(ch, method, properties, data):
     parsed_msg = json.loads(data)
