@@ -22,6 +22,7 @@ def connect_to_mb():
 
 channel = connect_to_mb()
 
+connection = None
 exchange_name = 'flamingo_exchange'
 create_order_routing_key = 'order_create_success'
 create_customer_routing_key = 'customer_create_success'
