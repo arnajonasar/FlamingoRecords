@@ -3,6 +3,7 @@ LABEL maintainer="Arna, Gabriel, Nanna"
 
 WORKDIR /app/customer-service
 
+ADD ../customer-db/db-scripts/init.sql /app
 COPY . /app
 
 RUN dotnet restore
